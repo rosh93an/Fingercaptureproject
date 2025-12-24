@@ -1,7 +1,3 @@
-
-
-
-
 name: Build APK with Kivy
 
 on:
@@ -17,22 +13,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build with Buildozer
-        # This version avoids the "chown" error and the "root" error
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
-        with:
-          command: buildozer android debug
-          buildozer_version: stable
-          # This is the key fix: it stops the Action from trying to run 'chown'
-          repository_read_only: false
+      - name: Build APK with Docker
+        run: |
+          # We use -i for interactive and pipe 'y' to satisfy the root check
+          docker run --rm -i \
+            -v ${{ github.workspace }}:/home/user/app \
+            -e BUILDOZER_ALLOW_ROOT=1 \
+            kivy/buildozer \
+            bash -c "echo y | buildozer android debug"
+
+      - name: Fix Permissions
+        if: always()
+        # This uses the GitHub runner's actual user ID instead of a hardcoded name
+        run: sudo chown -R $(id -u):$(id -g) .
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: FingerCapture-APK
           path: bin/*.apk
-
       
 
 
