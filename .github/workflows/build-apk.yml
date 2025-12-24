@@ -1,4 +1,4 @@
-name: Build APK with Kivy Docker
+name: Build APK with Kivy
 
 on:
   workflow_dispatch:
@@ -10,31 +10,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Build APK
-      run: |
-        # We use 'yes |' to bypass the [y/n] root prompt
-        # We use --user root to ensure the container has permission to write to the workspace
-        docker run --rm \
-          -v ${{ github.workspace }}:/home/user/app \
-          kivy/buildozer \
-          bash -c "yes | buildozer android debug"
+      - name: Build with Buildozer
+        # This action is designed for GitHub and handles the EOFError and Root issues automatically
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          command: buildozer android debug
+          buildozer_version: stable
 
-    - name: Fix Permissions
-      # Docker creates files as 'root', so we change ownership back to the GitHub runner user
-      if: always()
-      run: sudo chown -R $USER:$USER .
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: FingerCapture-APK
-        # Using a relative path is more reliable across different repo names
-        path: bin/*.apk
-
-
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: FingerCapture-APK
+          path: bin/*.apk
       
 
 
