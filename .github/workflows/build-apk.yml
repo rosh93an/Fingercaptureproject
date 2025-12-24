@@ -19,7 +19,8 @@ jobs:
           -e BUILDOZER_ALLOW_ROOT=1 \
           -v ${{ github.workspace }}:/home/buildozer/app \
           kivy/buildozer \
-          /bin/bash -c "buildozer android debug"
+          bash -c "BUILDOZER_ALLOW_ROOT=1 buildozer android debug"
+
 
 
 
