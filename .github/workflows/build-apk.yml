@@ -15,18 +15,24 @@ jobs:
 
     - name: Build APK
       run: |
+        # We use 'yes |' to bypass the [y/n] root prompt
+        # We use --user root to ensure the container has permission to write to the workspace
         docker run --rm \
-          -e BUILDOZER_ALLOW_ROOT=1 \
           -v ${{ github.workspace }}:/home/user/app \
           kivy/buildozer \
-          bash -c "BUILDOZER_ALLOW_ROOT=1 buildozer android debug"
+          bash -c "yes | buildozer android debug"
+
+    - name: Fix Permissions
+      # Docker creates files as 'root', so we change ownership back to the GitHub runner user
+      if: always()
+      run: sudo chown -R $USER:$USER .
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: FingerCapture-APK
-        path: /home/runner/work/Fingercaptureproject/Fingercaptureproject/bin/*.apk
-
+        # Using a relative path is more reliable across different repo names
+        path: bin/*.apk
 
 
       
