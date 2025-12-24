@@ -15,11 +15,11 @@ jobs:
 
     - name: Build APK
       run: |
-        docker run --rm -v ${{ github.workspace }}:/home/buildozer/app \
+        docker run --rm \
           -e BUILDOZER_ALLOW_ROOT=1 \
+          -v ${{ github.workspace }}:/home/buildozer/app \
           kivy/buildozer \
           buildozer android debug
-
 
 
 
