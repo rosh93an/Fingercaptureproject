@@ -1,4 +1,4 @@
-name: Build APK with Kivy Docker
+name: Build APK
 
 on:
   workflow_dispatch:
@@ -10,16 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Build APK
-      run: |
-        docker run --rm \
-           -u buildozer \
-           -v ${{ github.workspace }}:/home/buildozer/app \
-            kivy/buildozer \
-            buildozer android debug
+    - name: Build with Buildozer
+      uses: ArtyomSBulgakov/buildozer-action@v1
+      with:
+        workdir: .
+        buildozer_version: stable
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: FingerCapture-APK
+        path: bin/*.apk
+
 
       
 
