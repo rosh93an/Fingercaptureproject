@@ -1,36 +1,19 @@
-name: Build APK with Kivy
-
-on:
-  workflow_dispatch:
-  push:
-    branches: [ main ]
+name: Mobile Build
+on: workflow_dispatch
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Build APK with Docker
+      - uses: actions/checkout@v4
+      - name: Build APK
         run: |
-          # We use -i for interactive and pipe 'y' to satisfy the root check
-          docker run --rm -i \
-            -v ${{ github.workspace }}:/home/user/app \
-            -e BUILDOZER_ALLOW_ROOT=1 \
-            kivy/buildozer \
-            bash -c "echo y | buildozer android debug"
-
-      - name: Fix Permissions
-        if: always()
-        # This uses the GitHub runner's actual user ID instead of a hardcoded name
-        run: sudo chown -R $(id -u):$(id -g) .
-
-      - name: Upload APK
+          # The 'script' command tricks Buildozer into thinking there is a real screen/keyboard
+          script -e -c "docker run --rm -v ${{ github.workspace }}:/home/user/app -e BUILDOZER_ALLOW_ROOT=1 kivy/buildozer bash -c 'echo y | buildozer android debug'"
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: FingerCapture-APK
+          name: App-For-Mobile
           path: bin/*.apk
       
 
