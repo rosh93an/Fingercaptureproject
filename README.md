@@ -85,93 +85,37 @@
 
 
 **## 📂 Project Structure**
-**```**
-
-**finger-capture-prototype/**
-
-**│**
-
-**├── input\_images/          # Raw finger/palm images**
-
-**├── processed/             # Grayscale, cropped, enhanced images**
-
-**├── output/                # Final PDF export**
-
-**├── replicate.py           # Script for preprocessing**
-
-**├── pdf\_export.py          # Script for PDF generation**
-
-**└── README.md              # Documentation**
+finger-capture-prototype/
+│
+├── input_images/       # Raw finger/palm images (optional for batch scripts)
+├── processed/          # Grayscale, cropped, enhanced images
+├── output/             # Final PDF export
+├── app.py              # Streamlit app (interactive demo)
+├── replicate.py        # Script for preprocessing (batch mode)
+├── pdf_export.py       # Script for PDF generation (batch mode)
+├── requirements.txt    # Python dependencies
+└── README.md           # Documentation
 
 **---**
 
 **## 🏗️ Project Architecture**
+┌───────────────┐
+│   app.py      │  ← Streamlit UI
+│ - Upload      │
+│ - Process     │
+│ - Export PDF  │
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│ processed/    │  ← Enhanced images
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│ finger_scans.pdf │  ← Final PDF
+└───────────────┘
 
-                **┌─────────────────────┐**
-
-                **│   input\_images/     │**
-
-                **│  (raw finger/palm   │**
-
-                **│   sample images)    │**
-
-                **└─────────┬───────────┘**
-
-                          **│**
-
-                          **▼**
-
-                **┌─────────────────────┐**
-
-                **│   replicate.py      │**
-
-                **│  - Grayscale        │**
-
-                **│  - Contrast enhance │**
-
-                **│  - Crop \& resize    │**
-
-                **└─────────┬───────────┘**
-
-                          **│**
-
-                          **▼**
-
-                **┌─────────────────────┐**
-
-                **│   processed/        │**
-
-                **│ (cleaned images)    │**
-
-                **└─────────┬───────────┘**
-
-                          **│**
-
-                          **▼**
-
-                **┌─────────────────────┐**
-
-                **│   pdf\_export.py     │**
-
-                **│  - Add images to    │**
-
-                **│    PDF pages        │**
-
-                **│  - Save final file  │**
-
-                **└─────────┬───────────┘**
-
-                          **│**
-
-                          **▼**
-
-                **┌─────────────────────┐**
-
-                **│   output/           │**
-
-                **│ finger\_scans.pdf    │**
-
-                **└─────────────────────┘**
 
 **```**
 
@@ -339,6 +283,40 @@
 
 
 
+# 🚀 Demo Instructions
+Run Locally
+Clone the repo
+git clone https://github.com/<your-username>/finger-capture-prototype.git
+cd finger-capture-prototype
+
+#install dependencies
+pip install -r requirements.txt
+
+#run the app
+streamlit run app.py
+
+Open http://localhost:8501 in your browser.
+
+Run on Streamlit Cloud
+Push repo to GitHub.
+
+Deploy via Streamlit Cloud.
+
+Share the generated link (e.g. https://fingercaptureproject-xxxx.streamlit.app) with interviewers.
+
+
+📋 Requirements
+streamlit==1.39.0
+opencv-python-headless==4.7.0.72
+numpy==1.26.4
+fpdf==1.7.2
+reportlab==4.2.0
+pillow
+pdf2image
+
+
+📝 Notes
+This prototype demonstrates the technical workflow of the Brainwonders app without implementing full biometric analysis features. It serves as a proof of concept for image processing + export pipeline, now delivered interactively via Streamlit.
 
 
 
