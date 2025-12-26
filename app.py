@@ -18,20 +18,25 @@ if uploaded_file:
     with open(img_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    # Process image
-    img = cv2.imread(img_path)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    enhanced = cv2.equalizeHist(gray)
-    h, w = enhanced.shape
-    crop = enhanced[h//4:h*3//4, w//4:w*3//4]
-    resized = cv2.resize(crop, (300, 300))
+    # Show spinner while processing
+    with st.spinner("🔄 Processing fingerprint..."):
+        img = cv2.imread(img_path)
+        if img is None:
+            st.error("❌ Failed to read image. Please try a different file or format.")
+            st.stop()
 
-    output_path = os.path.join("processed", f"processed_{uploaded_file.name}")
-    cv2.imwrite(output_path, resized)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        enhanced = cv2.equalizeHist(gray)
+        h, w = enhanced.shape
+        crop = enhanced[h // 4:h * 3 // 4, w // 4:w * 3 // 4]
+        resized = cv2.resize(crop, (300, 300))
+
+        output_path = os.path.join("processed", f"processed_{uploaded_file.name}")
+        cv2.imwrite(output_path, resized)
 
     # Display safely
     st.image(Image.fromarray(resized), caption="Processed Fingerprint")
-    st.success(f"Processed and saved: {output_path}")
+    st.success(f"✅ Processed and saved: {output_path}")
 
     # Export to PDF
     if st.button("Export to PDF"):
@@ -43,4 +48,4 @@ if uploaded_file:
 
         # Streamlit download button
         with open(pdf_path, "rb") as f:
-            st.download_button("Download PDF", f, file_name="finger_scans.pdf")
+            st.download_button("📥 Download PDF", f, file_name="finger_scans.pdf")
