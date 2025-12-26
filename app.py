@@ -3,7 +3,7 @@ import cv2
 import os
 from fpdf import FPDF
 from PIL import Image
-from pdf2image import convert_from_bytes  # extra dependency
+from pdf2image import convert_from_bytes  # make sure pdf2image is in requirements.txt
 
 # Ensure folders exist
 os.makedirs("input_images", exist_ok=True)
@@ -12,15 +12,10 @@ os.makedirs("output", exist_ok=True)
 
 st.title("FingerCapture Demo")
 
-# Track last uploaded file in session state
-if "last_uploaded" not in st.session_state:
-    st.session_state.last_uploaded = None
-
 # Upload fingerprint
 uploaded_file = st.file_uploader("Upload fingerprint", type=["jpg", "png", "jpeg"])
-if uploaded_file and uploaded_file.name != st.session_state.last_uploaded:
-    st.session_state.last_uploaded = uploaded_file.name
-
+if uploaded_file:
+    # Save uploaded file
     img_path = os.path.join("input_images", uploaded_file.name)
     with open(img_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
@@ -32,6 +27,7 @@ if uploaded_file and uploaded_file.name != st.session_state.last_uploaded:
             st.error("❌ Failed to read image. Please try a different file or format.")
             st.stop()
 
+        # Process image
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         enhanced = cv2.equalizeHist(gray)
         h, w = enhanced.shape
@@ -41,7 +37,7 @@ if uploaded_file and uploaded_file.name != st.session_state.last_uploaded:
         output_path = os.path.join("processed", f"processed_{uploaded_file.name}")
         cv2.imwrite(output_path, resized)
 
-    # Display safely
+    # Display processed fingerprint
     st.image(Image.fromarray(resized), caption="Processed Fingerprint")
     st.success(f"✅ Processed and saved: {output_path}")
 
@@ -52,7 +48,7 @@ if uploaded_file and uploaded_file.name != st.session_state.last_uploaded:
             pdf.add_page()
             pdf.image(output_path, x=10, y=10, w=100)
 
-            # Get PDF as bytes instead of saving only to disk
+            # Get PDF as bytes
             pdf_bytes = pdf.output(dest="S").encode("latin1")
 
             # Preview first page of PDF
@@ -62,7 +58,7 @@ if uploaded_file and uploaded_file.name != st.session_state.last_uploaded:
             except Exception as e:
                 st.warning(f"Could not render PDF preview: {e}")
 
-            # Streamlit download button
+            # Download button
             st.download_button(
                 label="📥 Download PDF",
                 data=pdf_bytes,
@@ -70,9 +66,5 @@ if uploaded_file and uploaded_file.name != st.session_state.last_uploaded:
                 mime="application/pdf"
             )
 
-# Clear upload button
-if st.button("Clear uploaded file"):
-    st.session_state.last_uploaded = None
-    st.experimental_rerun()
 
 
