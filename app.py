@@ -11,9 +11,15 @@ os.makedirs("output", exist_ok=True)
 
 st.title("FingerCapture Demo")
 
+# Track last uploaded file in session state
+if "last_uploaded" not in st.session_state:
+    st.session_state.last_uploaded = None
+
 # Upload fingerprint
 uploaded_file = st.file_uploader("Upload fingerprint", type=["jpg", "png", "jpeg"])
-if uploaded_file:
+if uploaded_file and uploaded_file.name != st.session_state.last_uploaded:
+    st.session_state.last_uploaded = uploaded_file.name
+
     img_path = os.path.join("input_images", uploaded_file.name)
     with open(img_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
@@ -40,12 +46,19 @@ if uploaded_file:
 
     # Export to PDF
     if st.button("Export to PDF"):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.image(output_path, x=10, y=10, w=100)
-        pdf_path = os.path.join("output", "finger_scans.pdf")
-        pdf.output(pdf_path)
+        with st.spinner("📄 Generating PDF..."):
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.image(output_path, x=10, y=10, w=100)
+            pdf_path = os.path.join("output", "finger_scans.pdf")
+            pdf.output(pdf_path)
 
-        # Streamlit download button
-        with open(pdf_path, "rb") as f:
-            st.download_button("📥 Download PDF", f, file_name="finger_scans.pdf")
+            # Streamlit download button
+            with open(pdf_path, "rb") as f:
+                st.download_button("📥 Download PDF", f, file_name="finger_scans.pdf")
+
+# Clear upload button
+if st.button("Clear uploaded file"):
+    st.session_state.last_uploaded = None
+    st.experimental_rerun()
+
