@@ -18,7 +18,7 @@ if uploaded_file:
     with open(img_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    # Process image (replicate.py logic)
+    # Process image
     img = cv2.imread(img_path)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     enhanced = cv2.equalizeHist(gray)
@@ -29,14 +29,18 @@ if uploaded_file:
     output_path = os.path.join("processed", f"processed_{uploaded_file.name}")
     cv2.imwrite(output_path, resized)
 
-    st.image(resized, caption="Processed Fingerprint")
+    # Display safely
+    st.image(Image.fromarray(resized), caption="Processed Fingerprint")
     st.success(f"Processed and saved: {output_path}")
 
-    # Export to PDF (pdf_export.py logic)
+    # Export to PDF
     if st.button("Export to PDF"):
         pdf = FPDF()
         pdf.add_page()
         pdf.image(output_path, x=10, y=10, w=100)
         pdf_path = os.path.join("output", "finger_scans.pdf")
         pdf.output(pdf_path)
-        st.success(f"PDF created: {pdf_path}")
+
+        # Streamlit download button
+        with open(pdf_path, "rb") as f:
+            st.download_button("Download PDF", f, file_name="finger_scans.pdf")
