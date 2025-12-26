@@ -1,3 +1,4 @@
+pip==25.3
 streamlit==1.39.0
 opencv-python-headless==4.7.0.72
 numpy==1.26.4
