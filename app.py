@@ -3,6 +3,7 @@ import cv2
 import os
 from fpdf import FPDF
 from PIL import Image
+from pdf2image import convert_from_bytes  # extra dependency
 
 # Ensure folders exist
 os.makedirs("input_images", exist_ok=True)
@@ -50,15 +51,28 @@ if uploaded_file and uploaded_file.name != st.session_state.last_uploaded:
             pdf = FPDF()
             pdf.add_page()
             pdf.image(output_path, x=10, y=10, w=100)
-            pdf_path = os.path.join("output", "finger_scans.pdf")
-            pdf.output(pdf_path)
+
+            # Get PDF as bytes instead of saving only to disk
+            pdf_bytes = pdf.output(dest="S").encode("latin1")
+
+            # Preview first page of PDF
+            try:
+                images = convert_from_bytes(pdf_bytes, first_page=1, last_page=1)
+                st.image(images[0], caption="📄 PDF Preview (Page 1)")
+            except Exception as e:
+                st.warning(f"Could not render PDF preview: {e}")
 
             # Streamlit download button
-            with open(pdf_path, "rb") as f:
-                st.download_button("📥 Download PDF", f, file_name="finger_scans.pdf")
+            st.download_button(
+                label="📥 Download PDF",
+                data=pdf_bytes,
+                file_name="finger_scans.pdf",
+                mime="application/pdf"
+            )
 
 # Clear upload button
 if st.button("Clear uploaded file"):
     st.session_state.last_uploaded = None
     st.experimental_rerun()
+
 
