@@ -3,7 +3,7 @@ import cv2
 import os
 from fpdf import FPDF
 from PIL import Image
-from pdf2image import convert_from_bytes  # make sure pdf2image is in requirements.txt
+from pdf2image import convert_from_bytes  # for preview
 
 # Ensure folders exist
 os.makedirs("input_images", exist_ok=True)
@@ -20,14 +20,13 @@ if uploaded_file:
     with open(img_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    # Show spinner while processing
+    # Process image (replicate.py logic)
     with st.spinner("🔄 Processing fingerprint..."):
         img = cv2.imread(img_path)
         if img is None:
             st.error("❌ Failed to read image. Please try a different file or format.")
             st.stop()
 
-        # Process image
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         enhanced = cv2.equalizeHist(gray)
         h, w = enhanced.shape
@@ -41,17 +40,22 @@ if uploaded_file:
     st.image(Image.fromarray(resized), caption="Processed Fingerprint")
     st.success(f"✅ Processed and saved: {output_path}")
 
-    # Export to PDF
+    # Export to PDF (pdf_export.py logic)
     if st.button("Export to PDF"):
         with st.spinner("📄 Generating PDF..."):
             pdf = FPDF()
-            pdf.add_page()
-            pdf.image(output_path, x=10, y=10, w=100)
+            pdf.set_auto_page_break(auto=True, margin=15)
 
-            # Get PDF as bytes
+            # Loop through all processed images
+            for img_name in os.listdir("processed"):
+                if img_name.lower().endswith((".jpg", ".png", ".jpeg")):
+                    pdf.add_page()
+                    pdf.image(os.path.join("processed", img_name), x=10, y=10, w=100)
+
+            # Save PDF to memory
             pdf_bytes = pdf.output(dest="S").encode("latin1")
 
-            # Preview first page of PDF
+            # Preview first page
             try:
                 images = convert_from_bytes(pdf_bytes, first_page=1, last_page=1)
                 st.image(images[0], caption="📄 PDF Preview (Page 1)")
@@ -65,6 +69,7 @@ if uploaded_file:
                 file_name="finger_scans.pdf",
                 mime="application/pdf"
             )
+
 
 
 
